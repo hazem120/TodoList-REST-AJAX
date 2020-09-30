@@ -125,8 +125,11 @@ function getCookie(name) {
 }
 const csrftoken = getCookie('csrftoken');
     
+
+        buildList() 
         function buildList() {
-            var task = document.getElementById("list-wrapper")
+            var task = document.getElementById("list-wrapper") 
+            task.innerHTML = '';
             var url = "http://127.0.0.1:8000/api/task-list" 
             fetch(url)
             .then(res => res.json())
@@ -137,22 +140,35 @@ const csrftoken = getCookie('csrftoken');
                                         var item = `
                                             <div id="data-row-${i}" class="task-wrapper flex-wrapper">
                                                 <div style="flex:7">
-                                                    ${list[i].title}
+                                                   <span class = "title" >  ${list[i].title} </span>
                                                 </div>
-                                                <div style="flex:1">
-                                                    <button class="btn btn-sm btn-outline-info edit">Edit </button>
-                                                </div>
+
                                                 <div style="flex:1">
                                                     <button class="btn btn-sm btn-outline-dark delete">-</button>
                                                 </div>
                                             </div>
                                         `
+                                        task.innerHTML += item
                                     }
 
-                                    task.innerHTML += item
+                         for (var i in list){
+                            var deleteBtn = document.getElementsByClassName('delete')[i]
+                            var title = document.getElementsByClassName('title')[i]
+
+
+
+                            deleteBtn.addEventListener('click', (function(item){
+                                return function(){
+                                    deleteItem(item)
+                                }
+                            })(list[i]))
+
+                                    
+                                }
+                                    
             })
         }
-        buildList()
+        
 
 
 
@@ -176,10 +192,22 @@ const csrftoken = getCookie('csrftoken');
 
             }).then(function(response) { 
                 buildList()
+                document.getElementById('form').reset()
             })
         })
 
-
+		function deleteItem(item){
+			console.log('Delete clicked')
+			fetch(`http://127.0.0.1:8000/api/task/${item.id}/delete/`, {
+				method:'DELETE', 
+				headers:{
+					'Content-type':'application/json',
+					'X-CSRFToken':csrftoken,
+				}
+			}).then((response) => {
+				buildList()
+			})
+		}
      </script>
 
 </body>
